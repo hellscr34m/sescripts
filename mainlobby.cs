@@ -29,9 +29,55 @@ void UpdateLCDAndLights()
     if (lcd == null || targetBlock == null || alertLights.Count == 0)
         return;
 
+    // Get battery group
+    var batteryGroup = GridTerminalSystem.GetBlockGroupWithName("Asteroid - Batteries");
+    var batteries = new List<IMyBatteryBlock>();
+    if (batteryGroup != null)
+        batteryGroup.GetBlocksOfType(batteries);
+
+    float totalBatteryCapacity = 0f, currentBatteryCharge = 0f;
+    foreach (var battery in batteries)
+    {
+        totalBatteryCapacity += (float)battery.MaxStoredPower; // Explicit cast to float
+        currentBatteryCharge += (float)battery.CurrentStoredPower; // Explicit cast to float
+    }
+    float batteryPercentage = totalBatteryCapacity > 0 ? (currentBatteryCharge / totalBatteryCapacity) * 100 : 0;
+
+    // Get oxygen tank group
+    var oxygenGroup = GridTerminalSystem.GetBlockGroupWithName("Asteroid - Oxygen Tanks");
+    var oxygenTanks = new List<IMyGasTank>();
+    if (oxygenGroup != null)
+        oxygenGroup.GetBlocksOfType(oxygenTanks);
+
+    float totalOxygenCapacity = 0f, currentOxygenLevel = 0f;
+    foreach (var tank in oxygenTanks)
+    {
+        totalOxygenCapacity += (float)tank.Capacity; // Explicit cast to float
+        currentOxygenLevel += (float)(tank.Capacity * tank.FilledRatio); // Explicit cast to float
+    }
+    float oxygenPercentage = totalOxygenCapacity > 0 ? (currentOxygenLevel / totalOxygenCapacity) * 100 : 0;
+
+    // Get hydrogen tank group
+    var hydrogenGroup = GridTerminalSystem.GetBlockGroupWithName("Asteroid - Hydrogen Tanks");
+    var hydrogenTanks = new List<IMyGasTank>();
+    if (hydrogenGroup != null)
+        hydrogenGroup.GetBlocksOfType(hydrogenTanks);
+
+    float totalHydrogenCapacity = 0f, currentHydrogenLevel = 0f;
+    foreach (var tank in hydrogenTanks)
+    {
+        totalHydrogenCapacity += (float)tank.Capacity; // Explicit cast to float
+        currentHydrogenLevel += (float)(tank.Capacity * tank.FilledRatio); // Explicit cast to float
+    }
+    float hydrogenPercentage = totalHydrogenCapacity > 0 ? (currentHydrogenLevel / totalHydrogenCapacity) * 100 : 0;
+
+    // Prepare LCD output
     bool isOnline = targetBlock.IsWorking;
     string status = isOnline ? "Online" : "Offline";
-    string output = $"{targetBlock.CustomName} is {status}";
+    string output = $"{targetBlock.CustomName} is {status}\n";
+    output += $"Battery: {batteryPercentage:F1}%\n";
+    output += $"Oxygen: {oxygenPercentage:F1}%\n";
+    output += $"Hydrogen: {hydrogenPercentage:F1}%";
 
     lcd.ContentType = ContentType.TEXT_AND_IMAGE;
     lcd.FontSize = 1.5f;
