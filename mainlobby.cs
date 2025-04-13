@@ -74,10 +74,10 @@ void UpdateLCDAndLights()
     // Prepare LCD output
     bool isOnline = targetBlock.IsWorking;
     string status = isOnline ? "Online" : "Offline";
-    string output = $"{targetBlock.CustomName} is {status}\n";
-    output += $"Battery: {batteryPercentage:F1}%\n";
-    output += $"Oxygen: {oxygenPercentage:F1}%\n";
-    output += $"Hydrogen: {hydrogenPercentage:F1}%";
+    string output = $"{targetBlock.CustomName} is: [{status}]\n\n\n";
+    output += $"Battery: {batteryPercentage:F1}%\n\n";
+    output += $"Oxygen: {oxygenPercentage:F1}%\n\n";
+    output += $"Hydrogen: {hydrogenPercentage:F1}%\n\n";
 
     lcd.ContentType = ContentType.TEXT_AND_IMAGE;
     lcd.FontSize = 1.5f;
