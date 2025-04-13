@@ -173,6 +173,73 @@ void MoveItemsToStorage(string storageContainerName)
     }
 }
 
+void MoveComponentsToStorage(string storageContainerName)
+{
+    // Define the list of construction components to move
+    var componentNames = new List<string>
+    {
+        "SteelPlate",
+        "Construction",
+        "InteriorPlate",
+        "SmallTube",
+        "LargeTube",
+        "Motor",
+        "Display",
+        "BulletproofGlass",
+        "Computer",
+        "Reactor",
+        "Thrust",
+        "GravityGenerator",
+        "Medical",
+        "RadioCommunication",
+        "Detector",
+        "Explosives",
+        "SolarCell",
+        "PowerCell",
+        "Superconductor",
+        "Girder", // Corrected name for Girders
+        "MetalGrid" // Corrected name for Metal Grids
+    };
+
+    // Find the storage container
+    var storageContainer = GridTerminalSystem.GetBlockWithName(storageContainerName) as IMyCargoContainer;
+    if (storageContainer == null)
+    {
+        Echo($"Storage container '{storageContainerName}' not found!");
+        return;
+    }
+
+    // Get all blocks on the local grid with inventories
+    var inventoryBlocks = new List<IMyTerminalBlock>();
+    GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(inventoryBlocks, block => block.IsSameConstructAs(Me) && block.HasInventory);
+
+    // Iterate through each block and check its inventory
+    foreach (var block in inventoryBlocks)
+    {
+        var inventory = block.GetInventory(0); // Get the first inventory of the block
+        if (inventory == null)
+            continue;
+
+        // Check for items in the inventory
+        var items = new List<MyInventoryItem>();
+        inventory.GetItems(items);
+
+        foreach (var item in items)
+        {
+            // Check if the item is in the specified list
+            if (componentNames.Contains(item.Type.SubtypeId))
+            {
+                // Attempt to transfer the item to the storage container
+                var storageInventory = storageContainer.GetInventory(0);
+                if (storageInventory != null)
+                {
+                    inventory.TransferItemTo(storageInventory, item);
+                }
+            }
+        }
+    }
+}
+
 public void Main(string argument, UpdateType updateSource)
 {
     if (string.IsNullOrWhiteSpace(argument))
@@ -193,6 +260,10 @@ public void Main(string argument, UpdateType updateSource)
         case "move_items":
             string storageContainerName = "Asteroid - L. Cargo C";
             MoveItemsToStorage(storageContainerName);
+            break;
+        case "move_components":
+            string componentStorageContainerName = "Asteroid - L. Cargo D";
+            MoveComponentsToStorage(componentStorageContainerName);
             break;
         default:
             Echo($"Unknown argument: {argument}");
